@@ -3,6 +3,7 @@ from telebot import types
 from keys import *
 from constants import *
 from history import HistoryCollector
+from rag_parser import RAG_Parser
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 
@@ -39,6 +40,7 @@ def handle_help(call):
     help_text = HELP_TEXT
     for cmd in COMMANDS:
         help_text += f"/{cmd.command} - {cmd.description}\n"
+    # Bot messages
     bot.send_message(chat_id, help_text)
     render_button_options(chat_id)
 
@@ -55,7 +57,8 @@ def handle_user_problem(message):
     user_input = message.text
     history_collector.add_user_message(user_input, chat_id)
 
-    # bot logic TODO
+    rag_prompt = rag_parser.generate_prompt(user_input)
+    full_prompt = rag_prompt + '\n\n' + history_collector.get_formatted_history()
     bot_response = DEFAULT_ANSWER
 
     bot.send_message(chat_id, bot_response)
@@ -69,4 +72,6 @@ def handle_callback(call):
 
 if __name__ == "__main__":
     history_collector = HistoryCollector()
+    # TODO input parser features
+    rag_parser = RAG_Parser()
     bot.polling(none_stop=True)

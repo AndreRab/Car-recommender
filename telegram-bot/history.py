@@ -1,6 +1,10 @@
 class HistoryCollector:
-    def __init__(self, user_token='user', model_token='model'):
+    def __init__(self, user_token='User', model_token='AI'):
         self.history = {} 
+        with open('telegram-bot/system_prompt.txt', 'r') as f:
+            self.system_prompt = " ".join(f.readlines())
+            print(self.system_prompt)
+        self.history['system_prompt'] = self.system_prompt
         self.user_token = user_token
         self.model_token = model_token
 
