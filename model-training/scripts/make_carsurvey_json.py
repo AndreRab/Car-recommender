@@ -68,8 +68,8 @@ def get_review_link(url):
 def get_all_reviews_for_brand(brand_info, base_url = base_url):
   res = []
   print(f"  Extract info for {brand_info['name']}")
-  brand_link = brand_info['url']
-  models = extract_models(brand_link)
+  model_url = brand_info['url']
+  models = extract_models(model_url)
   for model in models:
     models_by_years = split_by_years(model)
     for model_year in models_by_years:
@@ -85,6 +85,8 @@ def extract_json(link):
   response = requests.get(link)
   soup = BeautifulSoup(response.text, 'html.parser')
   article = soup.find('article', class_='cf single-review')
+  model_name = article.find('h1').get_text(strip=True)
+  res['Model name: '] = model_name
   if not article:
     return
   for topic in article.find_all('section'):
@@ -111,7 +113,7 @@ def get_all_reviews_in_json(brand_links):
   for brand_link in tqdm(brand_links):
     reviews_links = get_all_reviews_for_brand(brand_link)
     for review_link in tqdm(reviews_links):
-       res.append(extract_json(review_link))
+      res.append(extract_json(review_link))
   return res
 
 brands = extract_most_popular_brands()

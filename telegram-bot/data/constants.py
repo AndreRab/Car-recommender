@@ -1,3 +1,7 @@
+MODEL_NAME = 'AndreiRabau/gpt-car-recommender-NEW'
+INDEX_PATH = 'telegram-bot/data/review_index.flatl2'
+METADATA_PATH = 'telegram-bot/data/review_metadata.pkl' 
+
 START_COMMAND = 'start'
 HELP_COMMAND = 'help'
 START_CONVERSATION = 'start_conversation'

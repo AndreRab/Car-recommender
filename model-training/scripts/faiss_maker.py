@@ -4,6 +4,10 @@ import numpy as np
 import json
 import faiss
 import pickle 
+from tqdm import tqdm
+import multiprocessing as mp
+
+mp.set_start_method("spawn", force=True)
 
 def get_embedding(text, tokenizer, model):
     inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True)
@@ -15,6 +19,8 @@ def get_embedding(text, tokenizer, model):
 def build_embedding_text(data):
     parts = []
 
+    if "Model name: " in data:
+        parts.append(f"Model name:  {data['Model name: ']}")
     if "Summary:" in data:
         parts.append(f"Summary: {data['Summary:']}")
     if "Faults:" in data:
@@ -25,41 +31,33 @@ def build_embedding_text(data):
     return "\n".join(parts)
 
 
-model_name = "our_model_name"
+model_name = "AndreiRabau/gpt-car-recommender-NEW"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModel.from_pretrained(model_name)
 
-review_path = 'model_training/data/reviews_carsurvej.json'
+review_path = 'model-training/data/reviews_carsurvej.json'
 
 with open(review_path, 'r', encoding='utf-8') as f:
     data = json.load(f)
+    data = [json.loads(entry) for entry in data]
 
 vectors = []
 metadata = []
-for review in data:
+for review in tqdm(data): 
     text = build_embedding_text(review)
     embedding = get_embedding(text, tokenizer, model)
     vectors.append(embedding)
     metadata.append(review)
 
 vectors = np.array(vectors).astype('float32')
-
 d = vectors.shape[1]
-nlist = 100
-m = 32
-nbits = 8
 
-quantizer = faiss.IndexFlatL2(d)
-index = faiss.IndexIVFPQ(quantizer, d, nlist, m, nbits)
-
-print("Training FAISS index...")
-index.train(vectors)  
-print("Adding vectors...")
+print("Building FAISS IndexFlatL2...")
+index = faiss.IndexFlatL2(d)
 index.add(vectors)
 
-index.nprobe = 10
-
-faiss.write_index(index, "model_training/data/review_index.ivfpq")
-
-with open("model_training/data/review_metadata.pkl", "wb") as f:
+faiss.write_index(index, "telegram-bot/data/review_index.flatl2")
+with open("telegram-bot/data/review_metadata.pkl", "wb") as f:
     pickle.dump(metadata, f)
+
+print("Index and metadata saved successfully.")

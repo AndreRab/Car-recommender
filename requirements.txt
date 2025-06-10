@@ -1,0 +1,6 @@
+pyTelegramBotAPI
+python-dotenv
+faiss-cpu
+torch
+transformers
+tqdm

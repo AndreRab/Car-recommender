@@ -1,9 +1,14 @@
+import torch
+torch.set_num_threads(1)
+torch.set_num_interop_threads(1)
+
 import telebot
 from telebot import types
+from data.constants import *
+from bot.history_collector import HistoryCollector
+from bot.rag_parser import RAG_Parser
 from keys import *
-from constants import *
-from history import HistoryCollector
-from rag_parser import RAG_Parser
+from bot.model import LLM
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 
@@ -40,7 +45,6 @@ def handle_help(call):
     help_text = HELP_TEXT
     for cmd in COMMANDS:
         help_text += f"/{cmd.command} - {cmd.description}\n"
-    # Bot messages
     bot.send_message(chat_id, help_text)
     render_button_options(chat_id)
 
@@ -58,8 +62,8 @@ def handle_user_problem(message):
     history_collector.add_user_message(user_input, chat_id)
 
     rag_prompt = rag_parser.generate_prompt(user_input)
-    full_prompt = rag_prompt + '\n\n' + history_collector.get_formatted_history()
-    bot_response = DEFAULT_ANSWER
+    full_prompt = build_prompt(rag_prompt, chat_id)
+    bot_response = model(full_prompt)
 
     bot.send_message(chat_id, bot_response)
     history_collector.add_model_message(bot_response, chat_id)
@@ -70,8 +74,16 @@ def handle_callback(call):
     handler = CALLBACK_HANDLERS.get(call.data, handle_default)
     handler(call)
 
+def build_prompt(rag_prompt, chat_id):
+    full_prompt = rag_prompt + '\n\n' + history_collector.get_formatted_history(chat_id) + '\n' + 'AI: '
+    return full_prompt
+
 if __name__ == "__main__":
     history_collector = HistoryCollector()
-    # TODO input parser features
-    rag_parser = RAG_Parser()
+    print('Loading model...')
+    model = LLM(MODEL_NAME)
+    print('Model loaded successfully')
+    print("Loading FAISS index...")
+    rag_parser = RAG_Parser(INDEX_PATH, METADATA_PATH, model)
+    print("FAISS imported successfully.")
     bot.polling(none_stop=True)

@@ -1,9 +1,8 @@
 class HistoryCollector:
     def __init__(self, user_token='User', model_token='AI'):
         self.history = {} 
-        with open('telegram-bot/system_prompt.txt', 'r') as f:
+        with open('telegram-bot/data/system_prompt.txt', 'r') as f:
             self.system_prompt = " ".join(f.readlines())
-            print(self.system_prompt)
         self.history['system_prompt'] = self.system_prompt
         self.user_token = user_token
         self.model_token = model_token
@@ -20,7 +19,7 @@ class HistoryCollector:
         self.add_message__(chat_id, self.model_token, message)
 
     def get_formatted_history(self, chat_id):
-        lines = []
+        lines = [self.system_prompt]
         for speaker, msg in self.history.get(chat_id, []):
             lines.append(f"{speaker}: {msg}")
         return '\n'.join(lines)
