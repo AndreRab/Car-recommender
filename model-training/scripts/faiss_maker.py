@@ -35,11 +35,11 @@ model_name = "AndreiRabau/gpt-car-recommender-NEW"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModel.from_pretrained(model_name)
 
-review_path = 'model-training/data/reviews_carsurvej.json'
+review_path = 'model-training/data/restored_reviews_carsurvej.json'
 
 with open(review_path, 'r', encoding='utf-8') as f:
     data = json.load(f)
-    data = [json.loads(entry) for entry in data]
+    # data = [json.loads(entry) for entry in data]
 
 vectors = []
 metadata = []

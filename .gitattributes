@@ -3,3 +3,7 @@ model-training/data/reviews_carsurvej.json filter=lfs diff=lfs merge=lfs -text
 .DS_Store
 telegram-bot/data/review_index.flatl2 filter=lfs diff=lfs merge=lfs -text
 telegram-bot/data/review_metadata.pkl filter=lfs diff=lfs merge=lfs -text
+.json filter=lfs diff=lfs merge=lfs -text
+*.json filter=lfs diff=lfs merge=lfs -text
+*.flatl2 filter=lfs diff=lfs merge=lfs -text
+*.pkl filter=lfs diff=lfs merge=lfs -text
